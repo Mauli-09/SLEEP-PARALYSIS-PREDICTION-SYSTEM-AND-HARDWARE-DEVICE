@@ -1,0 +1,144 @@
+╔══════════════════════════════════════════════════════╗
+║   SLEEP PARALYSIS PREDICTION SYSTEM — FULL REPORT   ║
+╚══════════════════════════════════════════════════════╝
+Generated: 2026-04-14 09:43:32
+
+MODEL: XGBoost (Gradient Boosted Decision Trees)
+APPROACH: Global model + Patient-specific fine-tuned models
+FEATURES USED: 20
+
+══════════════════════════════════════════════════════
+TOP FEATURE IMPORTANCES (GLOBAL MODEL)
+══════════════════════════════════════════════════════
+  Sleep_Efficiency                    0.1622
+  days_since_last_attack              0.1220
+  REM_slot                            0.1166
+  SPTI                                0.0799
+  Anxiety_Score                       0.0705
+  minutes_since_sleep_onset           0.0687
+  SPHI                                0.0405
+  Alcohol                             0.0364
+  Sleep_Debt_3d                       0.0363
+  Sleep_Duration                      0.0353
+
+══════════════════════════════════════════════════════
+FINAL PREDICTIONS PER PATIENT
+══════════════════════════════════════════════════════
+──────────────────────────────────────────────────
+Patient: P1
+Attack Probability: 0.5%
+Predicted Time Window:
+   02:45 – 03:00  (2:08 AM)
+Confidence Level: Low
+──────────────────────────────────────────────────
+──────────────────────────────────────────────────
+Patient: P2
+Attack Probability: 2.1%
+Predicted Time Windows:
+   1. 04:30 – 04:45  (5:01 AM)  [p=0.018]
+   2. 06:00 – 06:15  (6:23 AM)  [p=0.013]
+Confidence Level: Low
+──────────────────────────────────────────────────
+──────────────────────────────────────────────────
+Patient: P3
+Attack Probability: 1.1%
+Predicted Time Windows:
+   1. 04:45 – 05:00  (4:33 AM)  [p=0.011]
+   2. 06:00 – 06:15  (5:47 AM)  [p=0.008]
+   3. 02:45 – 03:00  (2:32 AM)  [p=0.006]
+Confidence Level: Low
+──────────────────────────────────────────────────
+
+══════════════════════════════════════════════════════
+ESP32 INTEGRATION NOTE
+══════════════════════════════════════════════════════
+→ Payload saved to: esp32_payload.json
+→ Each window triggers vibration motor for 15 minutes
+→ ESP32 reads JSON, activates relay at predicted start_time
+→ Motor runs for 15 min per window, daily repeat
+
+══════════════════════════════════════════════════════
+MATHEMATICAL SUMMARY
+══════════════════════════════════════════════════════
+  P(y=1|X) = σ(Σᵢ fᵢ(X))
+  Loss = -Σ[y·log(p) + (1-y)·log(1-p)]
+  Confidence: High≥0.75 | Medium≥0.50 | Low<0.50
+  Slot→Time: T = Slot × 15 min
+  hour_sin/cos → atan2 → 12h AM/PM
+
+
+
+
+
+
+
+
+
+
+
+"""
+╔══════════════════════════════════════════════════════════════════════════════╗
+║         SLEEP PARALYSIS ATTACK PREDICTION SYSTEM                           ║
+║         XGBoost-based Multi-Feature Time Series Classifier                 ║
+║         Patients: P1, P2, P3 | 60 Days | 15-min Slots                     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+APPROACH OVERVIEW:
+-----------------
+Sleep paralysis (SP) is a dissociative state occurring during REM-NREM
+transitions. Attacks cluster during specific time windows (3–6 AM), driven
+by circadian rhythm disruption and physiological vulnerability.
+
+This system uses XGBoost (Gradient Boosted Trees) to learn:
+    P(Attack | X) = σ(f(X))  where f(X) = Σ tree outputs
+
+FEATURE ROLES:
+--------------
+1. TEMPORAL (hour_sin, hour_cos, Slot_Index, minutes_since_sleep_onset)
+   → Capture WHEN attacks are likely (circadian patterning)
+   → hour_sin/cos encode cyclic 24h time without discontinuity at midnight
+
+2. REM FEATURES (REM_slot, REM_Vulnerability_Index)
+   → REM sleep is the primary biological trigger for SP
+   → REM_slot=1 means patient is in REM phase during that slot
+   → REM_Vulnerability_Index: composite score of REM instability
+
+3. HISTORICAL RISK (SPHI, rolling_attack_mean_7, days_since_last_attack)
+   → SPHI: Sleep Paralysis History Index — cumulative burden
+   → 7-day rolling mean: recent attack frequency trend
+   → Recency effect: shorter gap = higher risk (biological sensitization)
+
+4. TEMPORAL PATTERN INDICES (SPTI, Mean_Attack_Interval, Attack_Time_STD)
+   → SPTI: Sleep Paralysis Temporal Index — time-of-night risk score
+   → Mean_Attack_Interval & STD: Regularity of patient's attack pattern
+
+5. SLEEP QUALITY (Sleep_Duration, Sleep_Efficiency, Sleep_Debt_3d)
+   → Sleep deprivation and fragmented sleep increase SP risk
+   → Sleep_Debt_3d: accumulated deficit amplifies vulnerability
+
+6. VULNERABILITY INDEX (SPVI)
+   → SPVI: Sleep Paralysis Vulnerability Index — composite physiological risk
+
+7. PHYSIOLOGICAL STATE (HRV_ms, Stress, Anxiety_Score)
+   → Low HRV = autonomic imbalance → higher SP risk
+   → Stress + Anxiety elevate arousal threshold disruption during REM
+
+8. LIFESTYLE FACTORS (Caffeine_hrs_before_bed, Alcohol)
+   → Caffeine delays REM onset and fragments sleep architecture
+   → Alcohol suppresses REM early then causes REM rebound (SP trigger)
+
+TRAINING STRATEGY:
+------------------
+Step 1: Train a GLOBAL model on all 3 patients combined
+        → Learns universal SP patterns across patients
+Step 2: Fine-tune PATIENT-SPECIFIC models per patient
+        → Learns individual physiological patterns
+
+PREDICTION STRATEGY:
+--------------------
+1. Compute P(y=1|X) for every slot in a patient's night
+2. Rank slots by probability
+3. Group contiguous/clustered high-risk slots
+4. Convert group averages to clock time (Slot × 15 min)
+5. Output Top-1 or Top-3 windows with confidence
+"""

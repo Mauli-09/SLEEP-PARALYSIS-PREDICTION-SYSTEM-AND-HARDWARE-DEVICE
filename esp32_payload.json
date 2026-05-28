@@ -1,0 +1,77 @@
+{
+  "P1": {
+    "patient_id": "P1",
+    "attack_probability": 0.0047,
+    "confidence": "Low",
+    "vibration_windows": [
+      {
+        "start_time": "02:45",
+        "end_time": "03:00",
+        "duration_min": 15,
+        "probability": 0.0045,
+        "slot_center": 12,
+        "ampm": "2:08 AM"
+      }
+    ],
+    "trigger_daily": true,
+    "vibration_duration_min_per_window": 15
+  },
+  "P2": {
+    "patient_id": "P2",
+    "attack_probability": 0.0207,
+    "confidence": "Low",
+    "vibration_windows": [
+      {
+        "start_time": "04:30",
+        "end_time": "04:45",
+        "duration_min": 15,
+        "probability": 0.0176,
+        "slot_center": 19,
+        "ampm": "5:01 AM"
+      },
+      {
+        "start_time": "06:00",
+        "end_time": "06:15",
+        "duration_min": 15,
+        "probability": 0.0127,
+        "slot_center": 25,
+        "ampm": "6:23 AM"
+      }
+    ],
+    "trigger_daily": true,
+    "vibration_duration_min_per_window": 15
+  },
+  "P3": {
+    "patient_id": "P3",
+    "attack_probability": 0.0112,
+    "confidence": "Low",
+    "vibration_windows": [
+      {
+        "start_time": "04:45",
+        "end_time": "05:00",
+        "duration_min": 15,
+        "probability": 0.0112,
+        "slot_center": 20,
+        "ampm": "4:33 AM"
+      },
+      {
+        "start_time": "06:00",
+        "end_time": "06:15",
+        "duration_min": 15,
+        "probability": 0.0076,
+        "slot_center": 25,
+        "ampm": "5:47 AM"
+      },
+      {
+        "start_time": "02:45",
+        "end_time": "03:00",
+        "duration_min": 15,
+        "probability": 0.0061,
+        "slot_center": 12,
+        "ampm": "2:32 AM"
+      }
+    ],
+    "trigger_daily": true,
+    "vibration_duration_min_per_window": 15
+  }
+}
